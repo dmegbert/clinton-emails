@@ -1,24 +1,4 @@
----
-title: "Reading Hillary Clinton's Emails"
-output: github_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## Why?
-
-I like politics, am interested in NLP, and would like to know what Hillary and her 
-co-workers were emailing about that caused such a fuss.
-
-## Some info about the data
-
-* There are just under 8,000 emails in this data set <br>
-* Kaggle performed some processing to extract and clean the emails<br>
-* The code that prepared the data is available at <a href="https://github.com/benhamner/hillary-clinton-emails">this GitHub Repo</a>
-
-```{r check out emails, echo=FALSE}
+##get the emails
 library(dplyr)
 library(stringr)
 library(tidytext)
@@ -30,13 +10,11 @@ email.csv <- read.csv(file = "./data/Emails.csv", header = TRUE, nrows = 7946,
                       stringsAsFactors = FALSE)
 email <- tbl_df(email.csv)
 rm(email.csv)
-glimpse(email)
-```
 
-## What words show up most often in the email subjects
+##ok, now we have a dataframe of the emails
+##let's tokenize and do some exploring!
+##First up subject of emails
 
-I used the MetadataSubject Variable for this plot:
-```{r subject word count plot}
 tidy.email.subject <- email %>%
                 unnest_tokens(word, MetadataSubject)
 
@@ -57,16 +35,10 @@ tidy.email.subject %>%
     mutate(word = str_extract(word, "[a-z']+")) %>%
     count(word) %>%
     with(wordcloud(word, n, max.words = 50))
-```
 
-## Haiti vs. Iran
+#A lot of emails with 'sid' in the subject 
+#maybe related to longtime Clinton friend Sidney Blumenthal 
 
-The prior plot showed that Haiti and Iran were the two countries that showed 
-up most frequently in email's subjects
-
-So let's compare the words in those emails:
-
-```{r echo=FALSE}
 ## Let's compare words in emails with subject "haiti" and "iran"
 haiti.email <- email %>% 
     filter(grepl("haiti", MetadataSubject, ignore.case = TRUE)) %>%
@@ -106,5 +78,4 @@ ggplot(frequency, aes(x = iran, y = haiti, color = abs(iran - haiti))) +
     ##facet_wrap(~author, ncol = 2) +
     theme(legend.position="none") +
     labs(y = "Haiti", x = "Iran")
-```
 
